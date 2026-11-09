@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Visualisasi 3D: Vektor Teknik</title>
     
     <!-- Memuat Plotly.js untuk grafik 3D -->
@@ -25,6 +25,8 @@
             width: 60%;
             height: 100%;
             background-color: #ffffff;
+            /* Mencegah browser membajak gestur cubitan (pinch) sehingga Plotly bisa meresponsnya */
+            touch-action: none; 
         }
         #info-panel {
             width: 40%;
@@ -208,7 +210,8 @@
 
     <script>
         let currentActiveTab = 'TabSudut';
-        const config = { responsive: true };
+        // Konfigurasi Plotly untuk mengizinkan fungsi zoom via scroll dan sentuhan
+        const config = { responsive: true, scrollZoom: true, displayModeBar: true };
 
         // Fungsi berpindah Tab
         function openTab(evt, tabName) {
@@ -233,7 +236,6 @@
             else if (currentActiveTab === 'TabTorsi') updateTabTorsi();
             else if (currentActiveTab === 'TabLorentz') updateTabLorentz();
             
-            // Memaksa MathJax untuk merender ulang rumus baru
             if (window.MathJax) {
                 MathJax.typesetPromise();
             }
@@ -379,7 +381,8 @@
                     xaxis: { title: 'Sumbu X', backgroundcolor: '#f8f9fa' },
                     yaxis: { title: 'Sumbu Y', backgroundcolor: '#f8f9fa' },
                     zaxis: { title: 'Sumbu Z', backgroundcolor: '#f8f9fa' },
-                    aspectmode: aspectMode 
+                    aspectmode: aspectMode,
+                    camera: { eye: { x: 1.5, y: 1.5, z: 1.5 } }
                 },
                 legend: { x: 0, y: 1 },
                 margin: { l: 0, r: 0, b: 0, t: 40 }
@@ -388,9 +391,7 @@
             Plotly.react('plot-container', traces, layout, config);
         }
 
-        // Panggil saat pertama kali dimuat
         window.onload = updateApp;
     </script>
 </body>
-        </html>
-        
+</html>
