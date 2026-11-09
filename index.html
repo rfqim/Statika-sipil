@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisasi 3D: Sudut Antara Dua Batang Rangka</title>
+    
+    <!-- Memuat Plotly.js untuk grafik 3D -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    
+    <!-- Memuat MathJax untuk render rumus matematika -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #f4f7f6;
+        }
+        #plot-container {
+            width: 65%;
+            height: 100%;
+            background-color: #ffffff;
+        }
+        #info-panel {
+            width: 35%;
+            padding: 30px;
+            background: #ffffff;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+            overflow-y: auto;
+            border-left: 1px solid #e0e0e0;
+        }
+        h2 { color: #2c3e50; font-size: 1.5rem; margin-top: 0; }
+        p { color: #34495e; line-height: 1.6; }
+        .math-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow: auto; }
+            #plot-container, #info-panel { width: 100%; height: auto; min-height: 50vh; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container untuk Grafik 3D -->
+    <div id="plot-container"></div>
+
+    <!-- Panel Informasi & Rumus -->
+    <div id="info-panel">
+        <h2>Detail Perhitungan</h2>
+        <p>Verifikasi sudut benturan (joint) antara dua batang baja penyangga rangka atap baja.</p>
+        
+        <div class="math-box">
+            <strong>Vektor Batang:</strong>
+            <p>\( \vec{u} = 2\mathbf{i} + 2\mathbf{j} + 1\mathbf{k} \)</p>
+            <p>\( \vec{v} = 0\mathbf{i} + 4\mathbf{j} + 3\mathbf{k} \)</p>
+        </div>
+
+        <div class="math-box">
+            <strong>1. Dot Product:</strong>
+            <p>\( \vec{u} \cdot \vec{v} = (2)(0) + (2)(4) + (1)(3) \)</p>
+            <p>\( \vec{u} \cdot \vec{v} = 0 + 8 + 3 = 11 \)</p>
+        </div>
+
+        <div class="math-box">
+            <strong>2. Panjang Vektor:</strong>
+            <p>\( |\vec{u}| = \sqrt{2^2 + 2^2 + 1^2} = 3 \text{ m} \)</p>
+            <p>\( |\vec{v}| = \sqrt{0^2 + 4^2 + 3^2} = 5 \text{ m} \)</p>
+        </div>
+
+        <div class="math-box">
+            <strong>3. Sudut Jepit (\( \theta \)):</strong>
+            <p>\( \cos(\theta) = \frac{\vec{u} \cdot \vec{v}}{|\vec{u}| |\vec{v}|} \)</p>
+            <p>\( \cos(\theta) = \frac{11}{3 \times 5} = \frac{11}{15} \)</p>
+            <p>\( \theta = \arccos\left(\frac{11}{15}\right) \approx 42.83^\circ \)</p>
+        </div>
+        <p><small><em>*Gunakan mouse/touch untuk memutar, zoom, atau menggeser grafik 3D di samping.</em></small></p>
+    </div>
+
+    <script>
+        // Data Vektor
+        const u = { x: 2, y: 2, z: 1 };
+        const v = { x: 0, y: 4, z: 3 };
+
+        // Trace untuk Vektor u
+        const traceU = {
+            type: 'scatter3d',
+            mode: 'lines+markers+text',
+            x: [0, u.x], y: [0, u.y], z: [0, u.z],
+            line: { width: 8, color: '#3498db' }, // Biru
+            marker: { size: [0, 8], color: '#2980b9' },
+            text: ['', 'Batang u (2, 2, 1)'],
+            textposition: 'top right',
+            name: 'Vektor u'
+        };
+
+        // Trace untuk Vektor v
+        const traceV = {
+            type: 'scatter3d',
+            mode: 'lines+markers+text',
+            x: [0, v.x], y: [0, v.y], z: [0, v.z],
+            line: { width: 8, color: '#e74c3c' }, // Merah
+            marker: { size: [0, 8], color: '#c0392b' },
+            text: ['', 'Batang v (0, 4, 3)'],
+            textposition: 'top left',
+            name: 'Vektor v'
+        };
+
+        // Trace untuk titik Origin (Joint)
+        const traceOrigin = {
+            type: 'scatter3d',
+            mode: 'markers+text',
+            x: [0], y: [0], z: [0],
+            marker: { size: 10, color: '#2c3e50' },
+            text: ['Joint (0,0,0)'],
+            textposition: 'bottom center',
+            name: 'Joint'
+        };
+
+        // Layout Konfigurasi 3D
+        const layout = {
+            title: 'Visualisasi 3D Interaktif Rangka Atap',
+            scene: {
+                xaxis: { title: 'Sumbu X (m)', range: [-1, 5] },
+                yaxis: { title: 'Sumbu Y (m)', range: [-1, 5] },
+                zaxis: { title: 'Sumbu Z (m)', range: [-1, 5] },
+                aspectmode: 'cube',
+                camera: {
+                    eye: { x: 1.5, y: -1.5, z: 1.2 }
+                }
+            },
+            showlegend: false,
+            margin: { l: 0, r: 0, b: 0, t: 50 }
+        };
+
+        const config = { responsive: true };
+
+        // Render Grafik
+        Plotly.newPlot('plot-container', [traceU, traceV, traceOrigin], layout, config);
+    </script>
+</body>
+</html>
