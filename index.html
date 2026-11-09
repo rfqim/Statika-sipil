@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualisasi 3D: Sudut Antara Dua Batang Rangka</title>
+    <title>Visualisasi 3D: Vektor Teknik</title>
     
     <!-- Memuat Plotly.js untuk grafik 3D -->
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
@@ -22,19 +22,58 @@
             background-color: #f4f7f6;
         }
         #plot-container {
-            width: 65%;
+            width: 60%;
             height: 100%;
             background-color: #ffffff;
         }
         #info-panel {
-            width: 35%;
-            padding: 30px;
+            width: 40%;
             background: #ffffff;
             box-shadow: -2px 0 10px rgba(0,0,0,0.05);
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
             border-left: 1px solid #e0e0e0;
         }
-        h2 { color: #2c3e50; font-size: 1.5rem; margin-top: 0; margin-bottom: 15px;}
+        
+        /* Styling untuk Tabs */
+        .tab-header {
+            display: flex;
+            background-color: #ecf0f1;
+            border-bottom: 1px solid #bdc3c7;
+        }
+        .tab-header button {
+            flex: 1;
+            background-color: inherit;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 15px 10px;
+            transition: 0.3s;
+            font-weight: bold;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        .tab-header button:hover {
+            background-color: #bdc3c7;
+            color: #2c3e50;
+        }
+        .tab-header button.active {
+            background-color: #ffffff;
+            color: #2980b9;
+            border-top: 3px solid #3498db;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        h2 { color: #2c3e50; font-size: 1.4rem; margin-top: 0; margin-bottom: 15px;}
         p { color: #34495e; line-height: 1.6; margin: 5px 0;}
         
         .input-section {
@@ -48,15 +87,16 @@
             display: flex;
             align-items: center;
             margin-bottom: 10px;
-            gap: 10px;
+            gap: 5px;
+            flex-wrap: wrap;
         }
         .input-row label {
             font-weight: bold;
-            width: 80px;
-            color: #2980b9;
+            width: 90px;
+            color: #2c3e50;
         }
         .input-row input {
-            width: 60px;
+            width: 55px;
             padding: 5px;
             border: 1px solid #bdc3c7;
             border-radius: 4px;
@@ -68,13 +108,16 @@
             padding: 15px;
             border-radius: 8px;
             border-left: 4px solid #3498db;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             overflow-x: auto;
         }
+        .math-box.red { border-left-color: #e74c3c; }
+        .math-box.green { border-left-color: #2ecc71; }
         
         @media (max-width: 768px) {
             body { flex-direction: column; overflow: auto; }
-            #plot-container, #info-panel { width: 100%; height: auto; min-height: 50vh; }
+            #plot-container { width: 100%; height: 50vh; min-height: 400px; }
+            #info-panel { width: 100%; height: auto; border-left: none; border-top: 1px solid #e0e0e0; }
         }
     </style>
 </head>
@@ -83,150 +126,271 @@
     <!-- Container untuk Grafik 3D -->
     <div id="plot-container"></div>
 
-    <!-- Panel Informasi & Rumus -->
+    <!-- Panel Informasi & Tabs -->
     <div id="info-panel">
-        <h2>Interaktif: Sudut Rangka</h2>
-        
-        <div class="input-section">
-            <div class="input-row">
-                <label style="color: #2980b9;">Vektor u:</label>
-                <input type="number" id="ux" value="2" oninput="updateAll()"> i +
-                <input type="number" id="uy" value="2" oninput="updateAll()"> j +
-                <input type="number" id="uz" value="1" oninput="updateAll()"> k
+        <div class="tab-header">
+            <button class="tab-btn active" onclick="openTab(event, 'TabSudut')">1. Sudut Rangka (Dot)</button>
+            <button class="tab-btn" onclick="openTab(event, 'TabTorsi')">2. Torsi (Cross)</button>
+            <button class="tab-btn" onclick="openTab(event, 'TabLorentz')">3. Gaya Lorentz</button>
+        </div>
+
+        <!-- KONTEN TAB 1: Sudut Rangka -->
+        <div id="TabSudut" class="tab-content active">
+            <h2>Interaktif: Sudut Antara Batang Rangka</h2>
+            <div class="input-section">
+                <div class="input-row">
+                    <label style="color: #2980b9;">Vektor u:</label>
+                    <input type="number" id="t1_ux" value="2" oninput="updateApp()"> i +
+                    <input type="number" id="t1_uy" value="2" oninput="updateApp()"> j +
+                    <input type="number" id="t1_uz" value="1" oninput="updateApp()"> k
+                </div>
+                <div class="input-row" style="margin-bottom: 0;">
+                    <label style="color: #c0392b;">Vektor v:</label>
+                    <input type="number" id="t1_vx" value="0" oninput="updateApp()"> i +
+                    <input type="number" id="t1_vy" value="4" oninput="updateApp()"> j +
+                    <input type="number" id="t1_vz" value="3" oninput="updateApp()"> k
+                </div>
             </div>
-            <div class="input-row" style="margin-bottom: 0;">
-                <label style="color: #c0392b;">Vektor v:</label>
-                <input type="number" id="vx" value="0" oninput="updateAll()"> i +
-                <input type="number" id="vy" value="4" oninput="updateAll()"> j +
-                <input type="number" id="vz" value="3" oninput="updateAll()"> k
+            <div class="math-box"><strong>Vektor Batang:</strong><div id="t1_math-vektor"></div></div>
+            <div class="math-box"><strong>1. Dot Product:</strong><div id="t1_math-dot"></div></div>
+            <div class="math-box"><strong>2. Panjang Vektor:</strong><div id="t1_math-mag"></div></div>
+            <div class="math-box"><strong>3. Sudut Jepit (\( \theta \)):</strong><div id="t1_math-angle"></div></div>
+        </div>
+
+        <!-- KONTEN TAB 2: Torsi Mekanik -->
+        <div id="TabTorsi" class="tab-content">
+            <h2>Interaktif: Momen Gaya (Torsi)</h2>
+            <div class="input-section">
+                <div class="input-row">
+                    <label style="color: #f39c12;">Lengan (r):</label>
+                    <input type="number" id="t2_rx" value="0.3" step="0.1" oninput="updateApp()"> i +
+                    <input type="number" id="t2_ry" value="0" step="0.1" oninput="updateApp()"> j +
+                    <input type="number" id="t2_rz" value="0.1" step="0.1" oninput="updateApp()"> k
+                </div>
+                <div class="input-row" style="margin-bottom: 0;">
+                    <label style="color: #e74c3c;">Gaya (F):</label>
+                    <input type="number" id="t2_fx" value="0" oninput="updateApp()"> i +
+                    <input type="number" id="t2_fy" value="50" oninput="updateApp()"> j +
+                    <input type="number" id="t2_fz" value="-20" oninput="updateApp()"> k
+                </div>
             </div>
+            <div class="math-box red"><strong>Matriks Cross Product:</strong><div id="t2_math-matrix"></div></div>
+            <div class="math-box red"><strong>Hasil Vektor Torsi (\( \vec{\tau} \)):</strong><div id="t2_math-tau"></div></div>
+            <div class="math-box red"><strong>Besar (Magnitudo) Torsi:</strong><div id="t2_math-mag"></div></div>
         </div>
 
-        <div class="math-box">
-            <strong>Vektor Batang:</strong>
-            <div id="math-vektor"></div>
-        </div>
-
-        <div class="math-box">
-            <strong>1. Dot Product:</strong>
-            <div id="math-dot"></div>
-        </div>
-
-        <div class="math-box">
-            <strong>2. Panjang Vektor:</strong>
-            <div id="math-mag"></div>
-        </div>
-
-        <div class="math-box">
-            <strong>3. Sudut Jepit (\( \theta \)):</strong>
-            <div id="math-angle"></div>
+        <!-- KONTEN TAB 3: Gaya Lorentz -->
+        <div id="TabLorentz" class="tab-content">
+            <h2>Interaktif: Gaya Lorentz Motor Listrik</h2>
+            <div class="input-section">
+                <div class="input-row" style="margin-bottom: 15px;">
+                    <label style="color: #8e44ad; width: 120px;">Muatan (q):</label>
+                    <input type="number" id="t3_q" value="2" step="0.5" oninput="updateApp()"> Coulomb
+                </div>
+                <div class="input-row">
+                    <label style="color: #3498db; width: 120px;">Kecepatan (v):</label>
+                    <input type="number" id="t3_vx" value="10" oninput="updateApp()"> i +
+                    <input type="number" id="t3_vy" value="20" oninput="updateApp()"> j +
+                    <input type="number" id="t3_vz" value="0" oninput="updateApp()"> k
+                </div>
+                <div class="input-row" style="margin-bottom: 0;">
+                    <label style="color: #e67e22; width: 120px;">Medan Mag (B):</label>
+                    <input type="number" id="t3_bx" value="0" oninput="updateApp()"> i +
+                    <input type="number" id="t3_by" value="0" oninput="updateApp()"> j +
+                    <input type="number" id="t3_bz" value="5" oninput="updateApp()"> k
+                </div>
+            </div>
+            <div class="math-box green"><strong>Cross Product (\( \vec{v} \times \vec{B} \)):</strong><div id="t3_math-cross"></div></div>
+            <div class="math-box green"><strong>Gaya Lorentz (\( \vec{F} = q(\vec{v} \times \vec{B}) \)):</strong><div id="t3_math-force"></div></div>
+            <div class="math-box green"><strong>Besar Gaya:</strong><div id="t3_math-mag"></div></div>
         </div>
     </div>
 
     <script>
-        // Konfigurasi dasar layout 3D
+        let currentActiveTab = 'TabSudut';
         const config = { responsive: true };
-        
-        function updateAll() {
-            // 1. Ambil nilai dari input, gunakan 0 jika kosong
-            const ux = parseFloat(document.getElementById('ux').value) || 0;
-            const uy = parseFloat(document.getElementById('uy').value) || 0;
-            const uz = parseFloat(document.getElementById('uz').value) || 0;
-            
-            const vx = parseFloat(document.getElementById('vx').value) || 0;
-            const vy = parseFloat(document.getElementById('vy').value) || 0;
-            const vz = parseFloat(document.getElementById('vz').value) || 0;
 
-            // 2. Kalkulasi Matematis
+        // Fungsi berpindah Tab
+        function openTab(evt, tabName) {
+            const tabcontent = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            const tablinks = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            
+            currentActiveTab = tabName;
+            updateApp();
+        }
+
+        // Fungsi Master Update
+        function updateApp() {
+            if (currentActiveTab === 'TabSudut') updateTabSudut();
+            else if (currentActiveTab === 'TabTorsi') updateTabTorsi();
+            else if (currentActiveTab === 'TabLorentz') updateTabLorentz();
+            
+            // Memaksa MathJax untuk merender ulang rumus baru
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // --- LOGIKA TAB 1: SUDUT (DOT PRODUCT) ---
+        function updateTabSudut() {
+            const ux = parseFloat(document.getElementById('t1_ux').value) || 0;
+            const uy = parseFloat(document.getElementById('t1_uy').value) || 0;
+            const uz = parseFloat(document.getElementById('t1_uz').value) || 0;
+            const vx = parseFloat(document.getElementById('t1_vx').value) || 0;
+            const vy = parseFloat(document.getElementById('t1_vy').value) || 0;
+            const vz = parseFloat(document.getElementById('t1_vz').value) || 0;
+
             const dot = (ux * vx) + (uy * vy) + (uz * vz);
             const magU_sq = (ux*ux) + (uy*uy) + (uz*uz);
             const magV_sq = (vx*vx) + (vy*vy) + (vz*vz);
             const magU = Math.sqrt(magU_sq);
             const magV = Math.sqrt(magV_sq);
             
-            let cosTheta = 0;
-            let thetaDeg = 0;
+            let cosTheta = 0, thetaDeg = 0;
             if (magU > 0 && magV > 0) {
                 cosTheta = dot / (magU * magV);
-                // Mencegah error presisi floating point saat arccos (misal cosTheta > 1)
                 cosTheta = Math.max(-1, Math.min(1, cosTheta));
                 thetaDeg = Math.acos(cosTheta) * (180 / Math.PI);
             }
 
-            // 3. Update Teks Rumus (Siapkan string LaTeX)
-            document.getElementById('math-vektor').innerHTML = 
+            document.getElementById('t1_math-vektor').innerHTML = 
                 `\\( \\vec{u} = ${ux}\\mathbf{i} + ${uy}\\mathbf{j} + ${uz}\\mathbf{k} \\)<br>` +
                 `\\( \\vec{v} = ${vx}\\mathbf{i} + ${vy}\\mathbf{j} + ${vz}\\mathbf{k} \\)`;
 
-            document.getElementById('math-dot').innerHTML = 
-                `\\( \\vec{u} \cdot \\vec{v} = (${ux})(${vx}) + (${uy})(${vy}) + (${uz})(${vz}) \\)<br>` +
-                `\\( \\vec{u} \cdot \\vec{v} = ${ux*vx} + ${uy*vy} + ${uz*vz} = ${dot} \\)`;
+            document.getElementById('t1_math-dot').innerHTML = 
+                `\\( \\vec{u} \\cdot \\vec{v} = (${ux})(${vx}) + (${uy})(${vy}) + (${uz})(${vz}) = ${dot} \\)`;
 
-            document.getElementById('math-mag').innerHTML = 
-                `\\( |\\vec{u}| = \\sqrt{${ux}^2 + ${uy}^2 + ${uz}^2} = \\sqrt{${magU_sq}} \\approx ${magU.toFixed(2)} \\text{ m} \\)<br>` +
-                `\\( |\\vec{v}| = \\sqrt{${vx}^2 + ${vy}^2 + ${vz}^2} = \\sqrt{${magV_sq}} \\approx ${magV.toFixed(2)} \\text{ m} \\)`;
+            document.getElementById('t1_math-mag').innerHTML = 
+                `\\( |\\vec{u}| = \\sqrt{${magU_sq}} \\approx ${magU.toFixed(2)} \\text{ m} \\)<br>` +
+                `\\( |\\vec{v}| = \\sqrt{${magV_sq}} \\approx ${magV.toFixed(2)} \\text{ m} \\)`;
 
             if (magU > 0 && magV > 0) {
-                document.getElementById('math-angle').innerHTML = 
-                    `\\( \\cos(\\theta) = \\frac{\\vec{u} \\cdot \\vec{v}}{|\\vec{u}| |\\vec{v}|} \\)<br>` +
+                document.getElementById('t1_math-angle').innerHTML = 
                     `\\( \\cos(\\theta) = \\frac{${dot}}{\\sqrt{${magU_sq}} \\times \\sqrt{${magV_sq}}} \\approx ${cosTheta.toFixed(4)} \\)<br>` +
                     `\\( \\theta = \\arccos(${cosTheta.toFixed(4)}) \\approx \\mathbf{${thetaDeg.toFixed(2)}^\\circ} \\)`;
             } else {
-                document.getElementById('math-angle').innerHTML = `<p style="color:red;">Panjang vektor tidak boleh 0</p>`;
+                document.getElementById('t1_math-angle').innerHTML = `<p style="color:red;">Panjang vektor tidak boleh 0</p>`;
             }
 
-            // Memaksa MathJax untuk merender ulang rumus baru
-            if (window.MathJax) {
-                MathJax.typesetPromise();
-            }
-
-            // 4. Update Visualisasi 3D Plotly
-            const traceU = {
-                type: 'scatter3d', mode: 'lines+markers+text',
-                x: [0, ux], y: [0, uy], z: [0, uz],
-                line: { width: 8, color: '#3498db' },
-                marker: { size: [0, 8], color: '#2980b9' },
-                text: ['', `u (${ux}, ${uy}, ${uz})`],
-                textposition: 'top right', name: 'Vektor u'
-            };
-
-            const traceV = {
-                type: 'scatter3d', mode: 'lines+markers+text',
-                x: [0, vx], y: [0, vy], z: [0, vz],
-                line: { width: 8, color: '#e74c3c' },
-                marker: { size: [0, 8], color: '#c0392b' },
-                text: ['', `v (${vx}, ${vy}, ${vz})`],
-                textposition: 'top left', name: 'Vektor v'
-            };
-
-            const traceOrigin = {
-                type: 'scatter3d', mode: 'markers+text',
-                x: [0], y: [0], z: [0],
-                marker: { size: 10, color: '#2c3e50' },
-                text: ['Joint (0,0,0)'],
-                textposition: 'bottom center', name: 'Joint'
-            };
-
-            // Menyesuaikan rentang sumbu agar vektor selalu terlihat
-            const maxVal = Math.max(Math.abs(ux), Math.abs(uy), Math.abs(uz), Math.abs(vx), Math.abs(vy), Math.abs(vz), 5);
-
-            const layout = {
-                title: 'Visualisasi Interaktif Rangka Atap',
-                scene: {
-                    xaxis: { title: 'X', range: [-maxVal, maxVal] },
-                    yaxis: { title: 'Y', range: [-maxVal, maxVal] },
-                    zaxis: { title: 'Z', range: [-maxVal, maxVal] },
-                    aspectmode: 'cube'
-                },
-                showlegend: false,
-                margin: { l: 0, r: 0, b: 0, t: 50 }
-            };
-
-            Plotly.react('plot-container', [traceU, traceV, traceOrigin], layout, config);
+            renderPlotly([
+                { x:[0,ux], y:[0,uy], z:[0,uz], name:'Vektor u', color:'#2980b9', text:`u(${ux},${uy},${uz})` },
+                { x:[0,vx], y:[0,vy], z:[0,vz], name:'Vektor v', color:'#c0392b', text:`v(${vx},${vy},${vz})` }
+            ], 'Visualisasi Rangka Atap', 'data');
         }
 
-        // Panggil fungsi sekali saat halaman pertama kali dimuat
-        window.onload = updateAll;
+        // --- LOGIKA TAB 2: TORSI (CROSS PRODUCT) ---
+        function updateTabTorsi() {
+            const rx = parseFloat(document.getElementById('t2_rx').value) || 0;
+            const ry = parseFloat(document.getElementById('t2_ry').value) || 0;
+            const rz = parseFloat(document.getElementById('t2_rz').value) || 0;
+            const fx = parseFloat(document.getElementById('t2_fx').value) || 0;
+            const fy = parseFloat(document.getElementById('t2_fy').value) || 0;
+            const fz = parseFloat(document.getElementById('t2_fz').value) || 0;
+
+            const cx = (ry * fz) - (rz * fy);
+            const cy = (rz * fx) - (rx * fz);
+            const cz = (rx * fy) - (ry * fx);
+            const magTau = Math.sqrt(cx*cx + cy*cy + cz*cz);
+
+            document.getElementById('t2_math-matrix').innerHTML = 
+                `\\[ \\vec{\\tau} = \\begin{vmatrix} \\mathbf{i} & \\mathbf{j} & \\mathbf{k} \\\\ ${rx} & ${ry} & ${rz} \\\\ ${fx} & ${fy} & ${fz} \\end{vmatrix} \\]`;
+
+            document.getElementById('t2_math-tau').innerHTML = 
+                `\\( \\vec{\\tau} = ((${ry})(${fz}) - (${rz})(${fy}))\\mathbf{i} - ((${rx})(${fz}) - (${rz})(${fx}))\\mathbf{j} + ((${rx})(${fy}) - (${ry})(${fx}))\\mathbf{k} \\)<br><br>`+
+                `\\( \\vec{\\tau} = \\mathbf{${cx}\\mathbf{i} ${cy >= 0 ? '+ '+cy : '- '+Math.abs(cy)}\\mathbf{j} ${cz >= 0 ? '+ '+cz : '- '+Math.abs(cz)}\\mathbf{k}} \\text{ Nm} \\)`;
+
+            document.getElementById('t2_math-mag').innerHTML = 
+                `\\( |\\vec{\\tau}| = \\sqrt{(${cx})^2 + (${cy})^2 + (${cz})^2} = \\sqrt{${cx*cx + cy*cy + cz*cz}} \\approx \\mathbf{${magTau.toFixed(2)} \\text{ Nm}} \\)`;
+
+            renderPlotly([
+                { x:[0,rx], y:[0,ry], z:[0,rz], name:'Lengan (r)', color:'#f39c12', text:'r' },
+                { x:[rx,rx+fx], y:[ry,ry+fy], z:[rz,rz+fz], name:'Gaya (F) di ujung r', color:'#e74c3c', text:'F' },
+                { x:[0,cx], y:[0,cy], z:[0,cz], name:'Torsi (\u03C4)', color:'#8e44ad', text:'\u03C4', width:5, dash:'dash' }
+            ], 'Visualisasi Momen Gaya (Torsi)', 'auto');
+        }
+
+        // --- LOGIKA TAB 3: GAYA LORENTZ (CROSS PRODUCT + SKALAR) ---
+        function updateTabLorentz() {
+            const q = parseFloat(document.getElementById('t3_q').value) || 0;
+            const vx = parseFloat(document.getElementById('t3_vx').value) || 0;
+            const vy = parseFloat(document.getElementById('t3_vy').value) || 0;
+            const vz = parseFloat(document.getElementById('t3_vz').value) || 0;
+            const bx = parseFloat(document.getElementById('t3_bx').value) || 0;
+            const by = parseFloat(document.getElementById('t3_by').value) || 0;
+            const bz = parseFloat(document.getElementById('t3_bz').value) || 0;
+
+            const cx = (vy * bz) - (vz * by);
+            const cy = (vz * bx) - (vx * bz);
+            const cz = (vx * by) - (vy * bx);
+            
+            const fx = q * cx;
+            const fy = q * cy;
+            const fz = q * cz;
+            const magF = Math.sqrt(fx*fx + fy*fy + fz*fz);
+
+            document.getElementById('t3_math-cross').innerHTML = 
+                `\\[ \\vec{v} \\times \\vec{B} = \\begin{vmatrix} \\mathbf{i} & \\mathbf{j} & \\mathbf{k} \\\\ ${vx} & ${vy} & ${vz} \\\\ ${bx} & ${by} & ${bz} \\end{vmatrix} = ${cx}\\mathbf{i} ${cy >= 0 ? '+ '+cy : '- '+Math.abs(cy)}\\mathbf{j} ${cz >= 0 ? '+ '+cz : '- '+Math.abs(cz)}\\mathbf{k} \\]`;
+
+            document.getElementById('t3_math-force').innerHTML = 
+                `\\( \\vec{F} = ${q} \\times (${cx}\\mathbf{i} ${cy >= 0 ? '+ '+cy : '- '+Math.abs(cy)}\\mathbf{j} ${cz >= 0 ? '+ '+cz : '- '+Math.abs(cz)}\\mathbf{k}) \\)<br><br>`+
+                `\\( \\vec{F} = \\mathbf{${fx}\\mathbf{i} ${fy >= 0 ? '+ '+fy : '- '+Math.abs(fy)}\\mathbf{j} ${fz >= 0 ? '+ '+fz : '- '+Math.abs(fz)}\\mathbf{k}} \\text{ N} \\)`;
+
+            document.getElementById('t3_math-mag').innerHTML = 
+                `\\( |\\vec{F}| = \\sqrt{(${fx})^2 + (${fy})^2 + (${fz})^2} \\approx \\mathbf{${magF.toFixed(2)} \\text{ N}} \\)`;
+
+            renderPlotly([
+                { x:[0,vx], y:[0,vy], z:[0,vz], name:'Kecepatan (v)', color:'#3498db', text:'v' },
+                { x:[0,bx], y:[0,by], z:[0,bz], name:'Medan (B)', color:'#e67e22', text:'B' },
+                { x:[0,fx], y:[0,fy], z:[0,fz], name:'Gaya Lorentz (F)', color:'#2ecc71', text:'F', width:6, dash:'solid' }
+            ], 'Visualisasi Gaya Lorentz', 'auto');
+        }
+
+        // --- FUNGSI RENDER PLOTLY GLOBAL ---
+        function renderPlotly(vectorDataList, titleText, aspectMode) {
+            const traces = vectorDataList.map(v => ({
+                type: 'scatter3d', 
+                mode: 'lines+markers+text',
+                x: v.x, y: v.y, z: v.z,
+                line: { width: v.width || 8, color: v.color, dash: v.dash || 'solid' },
+                marker: { size: [0, 6], color: v.color },
+                text: ['', v.text],
+                textposition: 'top center',
+                name: v.name
+            }));
+
+            traces.push({
+                type: 'scatter3d', mode: 'markers',
+                x: [0], y: [0], z: [0],
+                marker: { size: 8, color: '#2c3e50' },
+                name: 'Origin (0,0,0)', showlegend: false, hoverinfo: 'none'
+            });
+
+            const layout = {
+                title: { text: titleText, font: { size: 18, color: '#2c3e50' } },
+                scene: {
+                    xaxis: { title: 'Sumbu X', backgroundcolor: '#f8f9fa' },
+                    yaxis: { title: 'Sumbu Y', backgroundcolor: '#f8f9fa' },
+                    zaxis: { title: 'Sumbu Z', backgroundcolor: '#f8f9fa' },
+                    aspectmode: aspectMode 
+                },
+                legend: { x: 0, y: 1 },
+                margin: { l: 0, r: 0, b: 0, t: 40 }
+            };
+
+            Plotly.react('plot-container', traces, layout, config);
+        }
+
+        // Panggil saat pertama kali dimuat
+        window.onload = updateApp;
     </script>
 </body>
-</html>
+        </html>
+        
