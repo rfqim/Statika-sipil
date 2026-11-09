@@ -13,6 +13,11 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <style>
+        /* Variabel CSS untuk pengaturan font dinamis */
+        :root {
+            --panel-font-size: 14px;
+        }
+
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -21,39 +26,65 @@
             overflow: hidden;
             background-color: #f4f7f6;
         }
+
+        /* Memperbesar area visualisasi (70%) */
         #plot-container {
-            width: 60%;
+            width: 70%; 
             height: 100%;
             background-color: #ffffff;
-            /* Mencegah browser membajak gestur cubitan (pinch) sehingga Plotly bisa meresponsnya */
             touch-action: none; 
         }
+
+        /* Memperkecil panel informasi (30%) */
         #info-panel {
-            width: 40%;
+            width: 30%;
             background: #ffffff;
             box-shadow: -2px 0 10px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
             border-left: 1px solid #e0e0e0;
+            font-size: var(--panel-font-size);
+        }
+
+        /* Menu Pengaturan Teks */
+        .settings-bar {
+            background-color: #eef2f5;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #bdc3c7;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .settings-bar select {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #bdc3c7;
+            font-family: inherit;
+            cursor: pointer;
         }
         
-        /* Styling untuk Tabs */
+        /* Tab Vertikal */
         .tab-header {
             display: flex;
+            flex-direction: column; /* Mengubah orientasi menjadi vertikal ke bawah */
             background-color: #ecf0f1;
             border-bottom: 1px solid #bdc3c7;
         }
         .tab-header button {
-            flex: 1;
             background-color: inherit;
             border: none;
+            border-left: 4px solid transparent; /* Garis indikator di sebelah kiri */
+            border-bottom: 1px solid #e0e0e0;
             outline: none;
             cursor: pointer;
-            padding: 15px 10px;
+            padding: 12px 15px;
             transition: 0.3s;
             font-weight: bold;
             color: #7f8c8d;
-            font-size: 0.9rem;
+            font-size: 1em;
+            text-align: left;
         }
         .tab-header button:hover {
             background-color: #bdc3c7;
@@ -62,12 +93,12 @@
         .tab-header button.active {
             background-color: #ffffff;
             color: #2980b9;
-            border-top: 3px solid #3498db;
+            border-left: 4px solid #3498db;
         }
 
         .tab-content {
             display: none;
-            padding: 20px;
+            padding: 15px;
             overflow-y: auto;
             flex-grow: 1;
         }
@@ -75,42 +106,43 @@
             display: block;
         }
 
-        h2 { color: #2c3e50; font-size: 1.4rem; margin-top: 0; margin-bottom: 15px;}
+        h2 { color: #2c3e50; font-size: 1.3em; margin-top: 0; margin-bottom: 15px;}
         p { color: #34495e; line-height: 1.6; margin: 5px 0;}
         
         .input-section {
             background: #eaf2f8;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border: 1px solid #d4e6f1;
         }
         .input-row {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             gap: 5px;
             flex-wrap: wrap;
         }
         .input-row label {
             font-weight: bold;
-            width: 90px;
+            min-width: 80px;
             color: #2c3e50;
         }
         .input-row input {
-            width: 55px;
+            width: 50px;
             padding: 5px;
             border: 1px solid #bdc3c7;
             border-radius: 4px;
             text-align: center;
             font-weight: bold;
+            font-size: 0.9em;
         }
         .math-box {
             background: #f8f9fa;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
             border-left: 4px solid #3498db;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             overflow-x: auto;
         }
         .math-box.red { border-left-color: #e74c3c; }
@@ -130,10 +162,23 @@
 
     <!-- Panel Informasi & Tabs -->
     <div id="info-panel">
+        
+        <!-- Menu Pengaturan Ukuran Teks -->
+        <div class="settings-bar">
+            <span>⚙️ Pengaturan Panel</span>
+            <select id="fontSizeSelect" onchange="changeFontSize()">
+                <option value="12px">Teks: Kecil</option>
+                <option value="14px" selected>Teks: Normal</option>
+                <option value="16px">Teks: Besar</option>
+                <option value="18px">Teks: Sangat Besar</option>
+            </select>
+        </div>
+
+        <!-- Header Tab (Vertikal) -->
         <div class="tab-header">
-            <button class="tab-btn active" onclick="openTab(event, 'TabSudut')">1. Sudut Rangka (Dot)</button>
-            <button class="tab-btn" onclick="openTab(event, 'TabTorsi')">2. Torsi (Cross)</button>
-            <button class="tab-btn" onclick="openTab(event, 'TabLorentz')">3. Gaya Lorentz</button>
+            <button class="tab-btn active" onclick="openTab(event, 'TabSudut')">1. Sudut Rangka (Dot Product)</button>
+            <button class="tab-btn" onclick="openTab(event, 'TabTorsi')">2. Torsi Mekanik (Cross Product)</button>
+            <button class="tab-btn" onclick="openTab(event, 'TabLorentz')">3. Gaya Lorentz (Cross + Skalar)</button>
         </div>
 
         <!-- KONTEN TAB 1: Sudut Rangka -->
@@ -183,20 +228,20 @@
 
         <!-- KONTEN TAB 3: Gaya Lorentz -->
         <div id="TabLorentz" class="tab-content">
-            <h2>Interaktif: Gaya Lorentz Motor Listrik</h2>
+            <h2>Interaktif: Gaya Lorentz</h2>
             <div class="input-section">
-                <div class="input-row" style="margin-bottom: 15px;">
-                    <label style="color: #8e44ad; width: 120px;">Muatan (q):</label>
-                    <input type="number" id="t3_q" value="2" step="0.5" oninput="updateApp()"> Coulomb
+                <div class="input-row" style="margin-bottom: 10px;">
+                    <label style="color: #8e44ad;">Muatan (q):</label>
+                    <input type="number" id="t3_q" value="2" step="0.5" oninput="updateApp()"> C
                 </div>
                 <div class="input-row">
-                    <label style="color: #3498db; width: 120px;">Kecepatan (v):</label>
+                    <label style="color: #3498db;">Kecepatan (v):</label>
                     <input type="number" id="t3_vx" value="10" oninput="updateApp()"> i +
                     <input type="number" id="t3_vy" value="20" oninput="updateApp()"> j +
                     <input type="number" id="t3_vz" value="0" oninput="updateApp()"> k
                 </div>
                 <div class="input-row" style="margin-bottom: 0;">
-                    <label style="color: #e67e22; width: 120px;">Medan Mag (B):</label>
+                    <label style="color: #e67e22;">Medan (B):</label>
                     <input type="number" id="t3_bx" value="0" oninput="updateApp()"> i +
                     <input type="number" id="t3_by" value="0" oninput="updateApp()"> j +
                     <input type="number" id="t3_bz" value="5" oninput="updateApp()"> k
@@ -210,10 +255,20 @@
 
     <script>
         let currentActiveTab = 'TabSudut';
-        // Konfigurasi Plotly untuk mengizinkan fungsi zoom via scroll dan sentuhan
         const config = { responsive: true, scrollZoom: true, displayModeBar: true };
 
-        // Fungsi berpindah Tab
+        // Fungsi Ubah Font Size
+        function changeFontSize() {
+            const size = document.getElementById('fontSizeSelect').value;
+            document.documentElement.style.setProperty('--panel-font-size', size);
+            
+            // Render ulang MathJax agar ukuran font matematika menyesuaikan dengan wadahnya
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Fungsi Berpindah Tab
         function openTab(evt, tabName) {
             const tabcontent = document.getElementsByClassName("tab-content");
             for (let i = 0; i < tabcontent.length; i++) {
